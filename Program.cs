@@ -5,6 +5,8 @@ using Discord.WebSocket;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace DiscordBot
 {
@@ -19,31 +21,35 @@ namespace DiscordBot
 
 		public async Task StartBotAsync()
 		{
-			var token = "OTM2MjM0MTAxNTU4NjI4MzU1.YfKN9A.0SnxXSyHfn6f4ouppf0RYjH7fSA";
-
-			using (var services = ConfigureServices())
+			using (StreamReader r = new StreamReader("config.json"))
 			{
-				var client = services.GetRequiredService<DiscordSocketClient>();
-				var commandHandler = services.GetRequiredService<CommandHandler>();
+				string json = r.ReadToEnd();
+				Config config = JsonConvert.DeserializeObject<Config>(json);
 
-				client.Ready += () => ReadyAsync(commandHandler);
-				client.Log += LogAsync;
-
-				await client.LoginAsync(TokenType.Bot, token);
-				await client.StartAsync();
-										
-				await client.SetGameAsync("Bot-Game");
-				await client.SetStatusAsync(UserStatus.DoNotDisturb);
-
-				while(true)
+				using (var services = ConfigureServices())
 				{
-					var now = DateTime.Now;
-					if (now.Hour == 13 && now.Minute == 37)
+					var client = services.GetRequiredService<DiscordSocketClient>();
+					var commandHandler = services.GetRequiredService<CommandHandler>();
+
+					client.Ready += () => ReadyAsync(commandHandler);
+					client.Log += LogAsync;
+
+					await client.LoginAsync(TokenType.Bot, config.Token);
+					await client.StartAsync();
+
+					await client.SetGameAsync("Bot-Game");
+					await client.SetStatusAsync(UserStatus.DoNotDisturb);
+
+					while (true)
 					{
-						var channel = await client.GetChannelAsync(190913208016437248) as IMessageChannel;
-						await channel.SendMessageAsync(":punch:");
+						var now = DateTime.Now;
+						if (now.Hour == 13 && now.Minute == 37)
+						{
+							var channel = await client.GetChannelAsync(190913208016437248) as IMessageChannel;
+							await channel.SendMessageAsync(":punch:");
+						}
+						await Task.Delay(60000);
 					}
-					await Task.Delay(60000);
 				}
 			}
 		}

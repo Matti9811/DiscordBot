@@ -13,8 +13,7 @@ namespace DiscordBot
 	internal class Program
 	{
 		static void Main(string[] args)
-		{
-			Global.Counter = 1;
+		{			
 			var programm = new Program();
 			programm.StartBotAsync().GetAwaiter().GetResult();
 		}
@@ -25,6 +24,7 @@ namespace DiscordBot
 			{
 				string json = r.ReadToEnd();
 				Config config = JsonConvert.DeserializeObject<Config>(json);
+				Global.Counter = config.NilsCounter;
 
 				using (var services = ConfigureServices())
 				{
@@ -44,7 +44,7 @@ namespace DiscordBot
 					while (true)
 					{
 						var googleTime = await InternetTime.GetCurrentTimeAsync();
-						var now = googleTime.Value.UtcDateTime;
+						var now = googleTime.Value.UtcDateTime.AddHours(1);
 						if (now.Hour == 13 && now.Minute == 37 && !punchExecuted)
 						{
 							var channel = await client.GetChannelAsync(190913208016437248) as IMessageChannel;

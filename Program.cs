@@ -40,15 +40,21 @@ namespace DiscordBot
 					await client.SetGameAsync("Bot-Game");
 					await client.SetStatusAsync(UserStatus.DoNotDisturb);
 
+					bool punchExecuted = false;
 					while (true)
 					{
-						var now = DateTime.Now;
-						if (now.Hour == 13 && now.Minute == 37)
+						var googleTime = await InternetTime.GetCurrentTimeAsync();
+						var now = googleTime.Value.UtcDateTime;
+						if (now.Hour == 13 && now.Minute == 37 && !punchExecuted)
 						{
 							var channel = await client.GetChannelAsync(190913208016437248) as IMessageChannel;
 							await channel.SendMessageAsync(":punch:");
+							punchExecuted = true;
 						}
-						await Task.Delay(60000);
+						else if (!(now.Hour == 13 && now.Minute == 37))
+						{
+							punchExecuted = false;
+						}
 					}
 				}
 			}

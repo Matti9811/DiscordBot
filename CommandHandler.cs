@@ -156,7 +156,7 @@ namespace DiscordBot
         return;
       }
 
-      if(message.Content == ":punch:")
+      if(message.Content == "👊")
 			{
         var myReaction = new Emoji("👊");
         await message.AddReactionAsync(myReaction);
